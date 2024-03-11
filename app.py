@@ -11,7 +11,7 @@ app.config['MYSQL_DB'] = 'flask'
 
 mysql = MySQL(app)
 
-@app.route('/rooms/<string: room_id>', methods=['GET'])
+@app.route('/rooms/<string:room_id>', methods=['GET'])
 def room_info(room_id):
     try:
         cursor = mysql.connection.cursor()
@@ -20,7 +20,7 @@ def room_info(room_id):
             "SELECT light.name, light.color, light.flashing_cycle_time "
             "FROM light "
             "JOIN room_light  "
-            "   ON room_light.light_id = light.light_id "
+            "   ON light.light_id = room_light.light_id  "
             "JOIN room  "
             "   ON room_light.room_id = room.room_id "
             "WHERE room.room_id = %s "
@@ -58,7 +58,7 @@ def get_distance(flashing_cycle_times):
     return math.lcm(*flashing_cycle_times) - 1
 
 
-@app.route('/check_lights/<string: room_id>', methods=['GET'])
+@app.route('/check_lights/<string:room_id>', methods=['GET'])
 def check_lights(room_id):
     try:
 
@@ -68,34 +68,6 @@ def check_lights(room_id):
 
         resurt = get_distance(flashing_cycle_times)
         return resurt
-
-    except Exception as e:
-        return jsonify({"error": str(e)})
-
-@app.route('/rooms/<string:room_id>/lights/distance', methods=['GET'])
-def get_lights_distance(room_id):
-    try:
-        cursor = mysql.connection.cursor()
-
-        sql = (
-            "SELECT light.flashing_cycle_time "
-            "FROM light "
-            "JOIN room_light ON room_light.light_id = light.light_id "
-            "WHERE room_light.room_id = %s "
-            "AND light.flashing_cycle_time > 1; "
-        )
-
-        params = [room_id]
-
-        cursor.execute(sql, params)
-
-        lights = cursor.fetchall()
-        cursor.close()
-
-        flashing_cycle_times = list(map(lambda light: light["flashing_cycle_time"], lights))
-        distance = get_distance(flashing_cycle_times)
-
-        return jsonify({'distance': distance})
 
     except Exception as e:
         return jsonify({"error": str(e)})
