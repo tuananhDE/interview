@@ -1,0 +1,17 @@
+# Sử dụng base image chứa Python
+FROM python:3.8-slim
+
+# Set the working directory trong container
+WORKDIR /app
+
+# Sao chép mã nguồn ứng dụng vào thư mục /app trong container
+COPY . /app
+
+# Cài đặt các dependencies từ requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Expose cổng 5000 để ứng dụng có thể truy cập từ bên ngoài
+EXPOSE 5000
+
+# Chạy ứng dụng Flask
+CMD ["python", "app.py"]
